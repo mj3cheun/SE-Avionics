@@ -34,6 +34,7 @@ public class executor
     public int yLength = 50;
     public string prefix = "";
     public string br = "\n";
+    public string brDelimiter = "<br>";
     public string instructionSet = "";
     public char instructionDelimiter = ';';
     public char argumentDelimiter = ':';
@@ -46,7 +47,7 @@ public class executor
         string[] instructionSet = this.instructionSet.Split(instructionDelimiter);
         for (int i = 0; i < instructionSet.Length; i++)
         {
-            string[] operation = instructionSet[i].Replace("\n", "").Split(argumentDelimiter);
+            string[] operation = instructionSet[i].Replace("\n", "").Replace(brDelimiter, "\n").Split(argumentDelimiter);
 
             switch (operation[0])
             {
@@ -62,6 +63,17 @@ public class executor
                         this.xLength = int.Parse(args[0]);
                         this.yLength = int.Parse(args[1]);
                         grid.LCD.debugWrite(this.xLength.ToString() + "," + this.yLength.ToString(), true);
+                    }
+                    break;
+
+                case "print":
+                    {
+                        grid.LCD.debugWrite(operation[0], true);
+                        output += prefix;
+                        for (int j = 1; j < operation.Length; j++)
+                        {
+                            output += operation[j];
+                        }
                     }
                     break;
 
