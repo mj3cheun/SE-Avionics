@@ -118,6 +118,28 @@ public class executor
                     output += br;
                     break;
 
+                case "getShipInv":
+                    {
+                        output += prefix;
+                        grid.LCD.debugWrite(operation[0], true);
+                        float numItems = grid.ship.getShipInv(operation[1]);
+                        output += operation[1] + ": ";
+                        output += numItems.ToString() + br;
+                    }
+                    break;
+
+                case "getShipInvbyName":
+                    {
+                        output += prefix;
+                        grid.LCD.debugWrite(operation[0], true);
+                        grid.LCD.debugWrite(operation[1], true);
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        float numItems = grid.ship.getShipInvbyName(args[0], args[1]);
+                        output += args[1] + " - " + args[0] + ": ";
+                        output += numItems.ToString() + br;
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -142,7 +164,7 @@ public class state
         grid._GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactors);
         grid._GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries);
         grid._GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
-        grid._GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(reloadableRockets);
+        grid._GridTerminalSystem.GetBlocksOfType<IMySmallMissileLauncherReload>(reloadableRockets);
         grid._GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(gatlings);
 
         powerConversion.Add("W", 1);
@@ -193,6 +215,69 @@ public class state
             }
         }
         return availableOutput;
+    }
+
+    public float getShipInv(string itemType)
+    {
+        List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
+        List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
+        grid._GridTerminalSystem.GetBlocks(shipInv);
+        float numItems = 0;
+        string invstr = "";
+
+        for (int i = 0; i < shipInv.Count; i++)
+        {
+            var inv = shipInv[i].GetInventory(0);
+            if (inv != null)
+            {
+                List<IMyInventoryItem> items = inv.GetItems();
+                itemsList.AddRange(items);
+            }
+        }
+
+        for (int i = 0; i < itemsList.Count; i++)
+        {
+            invstr = itemsList[i].Content.SubtypeName;
+            if (itemType == itemsList[i].Content.SubtypeName)
+            {
+                numItems += float.Parse(itemsList[i].Amount.ToString());
+            }
+        }
+
+        return numItems;
+    }
+
+    public float getShipInvbyName(string invName, string itemType)
+    {
+        grid.LCD.debugWrite("INV START", true);
+        List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
+        List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
+        grid._GridTerminalSystem.SearchBlocksOfName(invName, shipInv);
+        float numItems = 0;
+        string invstr = "";
+
+        for (int i = 0; i < shipInv.Count; i++)
+        {
+            var inv = shipInv[i].GetInventory(0);
+            if (inv != null)
+            {
+                List<IMyInventoryItem> items = inv.GetItems();
+                itemsList.AddRange(items);
+            }
+        }
+
+        for (int i = 0; i < itemsList.Count; i++)
+        {
+            grid.LCD.debugWrite(itemsList[i].Content.SubtypeName.ToString(), true);
+            grid.LCD.debugWrite(itemsList[i].Amount.ToString(), true);
+            invstr = itemsList[i].Content.SubtypeName;
+            if (itemType == itemsList[i].Content.SubtypeName)
+            {
+                numItems += float.Parse(itemsList[i].Amount.ToString());
+            }
+        }
+
+        return numItems;
     }
 
     public int gatlingAmmAvailable()
