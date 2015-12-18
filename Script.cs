@@ -122,9 +122,32 @@ public class executor
                     {
                         output += prefix;
                         grid.LCD.debugWrite(operation[0], true);
-                        float numItems = grid.ship.getShipInv(operation[1]);
-                        output += operation[1] + ": ";
-                        output += numItems.ToString() + br;
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            float numItems = grid.ship.getShipInv(args[j++]);
+
+                            switch (args[j])
+                            {
+                                case "displayPercentageBar":
+                                    output += grid.LCD.renderPercentageBar(numItems/float.Parse(args[++j]), xLength);
+                                    break;
+
+                                case "displayPercentage":
+                                    output += "Percentage: " + (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    break;
+
+                                case "displayNumItems":
+                                    output += "Num Items: " + numItems;
+                                    break;
+
+                                default:
+                                    output += "UNKNOWN OPTION: " + args[j];
+                                    break;
+                            }
+                        }
+                        output += br;
                     }
                     break;
 
@@ -363,10 +386,9 @@ public class display
         string output = barStart;
 
         float barFillNum = ((percentage) * (xLength - barStart.Length - barEnd.Length)) / barFill.Length;
-
         for (int i = barStart.Length + barEnd.Length - 2; i < xLength - barEmpty.Length - 1; i++)
         {
-            if (i < barFillNum)
+            if (i < barFillNum + barStart.Length + barEnd.Length - 2)
             {
                 output += barFill;
             }
