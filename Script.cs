@@ -155,11 +155,30 @@ public class executor
                     {
                         output += prefix;
                         grid.LCD.debugWrite(operation[0], true);
-                        grid.LCD.debugWrite(operation[1], true);
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        float numItems = grid.ship.getShipInvbyName(args[0], args[1]);
-                        output += args[1] + " - " + args[0] + ": ";
-                        output += numItems.ToString() + br;
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            float numItems = grid.ship.getShipInvbyName(args[j++], args[j++]);
+
+                            switch (args[j])
+                            {
+                                case "displayPercentageBar":
+                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength);
+                                    break;
+
+                                case "displayPercentage":
+                                    output += "Percentage: " + (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    break;
+
+                                case "displayNumItems":
+                                    output += "Num Items: " + numItems.ToString();
+                                    break;
+
+                                default:
+                                    output += "UNKNOWN OPTION: " + args[j];
+                                    break;
+                            }
+                        }
                     }
                     break;
 
