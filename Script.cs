@@ -12,7 +12,6 @@ void Main()
     grid.LCD.debugWrite("TESTING START", false);
     grid.LCD.executeInstructions();
 
-
 }
 
 public static class grid
@@ -113,8 +112,47 @@ public class executor
                 case "totalPowerAvailable":
                     output += prefix;
                     grid.LCD.debugWrite(operation[0], true);
-                    float powerAvailable = grid.ship.powerAvailable();
                     output += "Power Available: " + grid.ship.returnFormattedPower(grid.ship.powerAvailable());
+                    output += br;
+                    break;
+
+                case "totalBatteryStored":
+                    {
+                        grid.LCD.debugWrite(operation[0], true);
+                        float batteryStored = grid.ship.batteryPowerStored();
+                        float percentage = batteryStored / grid.ship.batteryPowerMax();
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            output += prefix;
+                            switch (args[j])
+                            {
+                                case "displayPercentageBar":
+                                    output += grid.LCD.renderPercentageBar(percentage, xLength);
+                                    break;
+
+                                case "displayPercentage":
+                                    output += "Percentage: " + (percentage * 100) + "%";
+                                    break;
+
+                                case "displayBatteryStored":
+                                    output += "Battery Percentage: " + grid.ship.returnFormattedPower(batteryStored) + "h";
+                                    break;
+
+                                default:
+                                    output += "UNKNOWN OPTION: " + args[j];
+                                    break;
+                            }
+                            output += br;
+                        }
+                    }
+                    break;
+
+                case "totalBatteryMax":
+                    output += prefix;
+                    grid.LCD.debugWrite(operation[0], true);
+                    output += "Battery Max: " + grid.ship.returnFormattedPower(grid.ship.batteryPowerMax()) + "h";
                     output += br;
                     break;
 
@@ -257,6 +295,34 @@ public class state
             }
         }
         return availableOutput;
+    }
+
+    public float batteryPowerMax()
+    {
+        float maxPower = 0;
+        for (int i = 0; i < batteries.Count; i++)
+        {
+            if (batteries[i].DetailedInfo.Contains("Max Stored Power"))
+            {
+                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Stored Power") + 18);
+                maxPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+            }
+        }
+        return maxPower;
+    }
+
+    public float batteryPowerStored()
+    {
+        float storedPower = 0;
+        for (int i = 0; i < batteries.Count; i++)
+        {
+            if (batteries[i].DetailedInfo.Contains("\nStored power"))
+            {
+                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Stored power") + 14);
+                storedPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+            }
+        }
+        return storedPower;
     }
 
     public float getShipInv(string itemType)
