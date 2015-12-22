@@ -69,10 +69,9 @@ public class executor
                     }
                     break;
 
-                case "print":
+                case "echo":
                     {
                         grid.LCD.debugWrite(operation[0], true);
-                        output += prefix;
                         for (int j = 1; j < operation.Length; j++)
                         {
                             output += operation[j];
@@ -89,7 +88,6 @@ public class executor
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            output += prefix;
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
@@ -97,27 +95,24 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += "Percentage: " + (percentage * 100) + "%";
+                                    output += (percentage * 100) + "%";
                                     break;
 
                                 case "displayPowerUsed":
-                                    output += "Power Used: " + grid.ship.returnFormattedPower(powerUsed);
+                                    output += grid.ship.returnFormattedPower(powerUsed);
                                     break;
 
                                 default:
                                     output += "UNKNOWN OPTION: " + args[j];
                                     break;
                             }
-                            output += br;
                         }
                     }
                     break;
 
                 case "totalPowerAvailable":
-                    output += prefix;
                     grid.LCD.debugWrite(operation[0], true);
-                    output += "Power Available: " + grid.ship.returnFormattedPower(grid.ship.powerAvailable());
-                    output += br;
+                    output += grid.ship.returnFormattedPower(grid.ship.powerAvailable());
                     break;
 
                 case "totalBatteryStored":
@@ -129,7 +124,6 @@ public class executor
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            output += prefix;
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
@@ -137,32 +131,28 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += "Percentage: " + (percentage * 100) + "%";
+                                    output += (percentage * 100) + "%";
                                     break;
 
                                 case "displayBatteryStored":
-                                    output += "Battery Percentage: " + grid.ship.returnFormattedPower(batteryStored) + "h";
+                                    output += grid.ship.returnFormattedPower(batteryStored) + "h";
                                     break;
 
                                 default:
                                     output += "UNKNOWN OPTION: " + args[j];
                                     break;
                             }
-                            output += br;
                         }
                     }
                     break;
 
                 case "totalBatteryMax":
-                    output += prefix;
                     grid.LCD.debugWrite(operation[0], true);
-                    output += "Battery Max: " + grid.ship.returnFormattedPower(grid.ship.batteryPowerMax()) + "h";
-                    output += br;
+                    output += grid.ship.returnFormattedPower(grid.ship.batteryPowerMax()) + "h";
                     break;
 
                 case "getShipInv":
                     {
-                        output += prefix;
                         grid.LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
@@ -177,11 +167,11 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += "Percentage: " + (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    output += (numItems / float.Parse(args[++j]) * 100) + "%";
                                     break;
 
                                 case "displayNumItems":
-                                    output += "Num Items: " + numItems;
+                                    output += numItems;
                                     break;
 
                                 default:
@@ -195,7 +185,6 @@ public class executor
 
                 case "getShipInvbyName":
                     {
-                        output += prefix;
                         grid.LCD.debugWrite(operation[0], true);
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
@@ -209,11 +198,11 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += "Percentage: " + (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    output += (numItems / float.Parse(args[++j]) * 100) + "%";
                                     break;
 
                                 case "displayNumItems":
-                                    output += "Num Items: " + numItems.ToString();
+                                    output += numItems.ToString();
                                     break;
 
                                 default:
