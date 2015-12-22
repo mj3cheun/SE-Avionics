@@ -51,9 +51,13 @@ public class executor
             switch (operation[0])
             {
                 case "prefix":
-                    grid.LCD.debugWrite(operation[0], true);
-                    this.prefix = operation[1];
-                    break;
+		    grid.LCD.debugWrite(operation[0], true);
+		    this.prefix = operation[1];
+		    break;
+
+		case "nl":
+		    output += br + prefix;
+		    break;
 
                 case "viewportSize":
                     {
