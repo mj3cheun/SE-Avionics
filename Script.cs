@@ -95,7 +95,7 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += (percentage * 100) + "%";
+                                    output += formatNumberPercentage(percentage * 100);
                                     break;
 
                                 case "displayPowerUsed":
@@ -131,7 +131,7 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += (percentage * 100) + "%";
+                                    output += formatNumberPercentage(percentage * 100);
                                     break;
 
                                 case "displayBatteryStored":
@@ -167,7 +167,7 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    output += formatNumberPercentage(numItems / float.Parse(args[++j]) * 100);
                                     break;
 
                                 case "displayNumItems":
@@ -198,7 +198,7 @@ public class executor
                                     break;
 
                                 case "displayPercentage":
-                                    output += (numItems / float.Parse(args[++j]) * 100) + "%";
+                                    output += formatNumberPercentage(numItems / float.Parse(args[++j]) * 100);
                                     break;
 
                                 case "displayNumItems":
@@ -218,6 +218,13 @@ public class executor
             }
         }
         return output;
+    }
+
+    string formatNumberPercentage(float number)
+    {
+        output = (number < 10000) ? (String.Format("{0,-" + ((output.IndexOf('.') >= 3) ? "6" : "7") + "}", (String.Format("{0:###0.0}%", number)))) : "+9999%";
+        output = (output.IndexOf('.') == 1) ? (output + " ") : (output);
+        return (output.IndexOf('1') == -1) || (output.IndexOf('.') > 3) ? (output) : (output + " ");
     }
 }
 
