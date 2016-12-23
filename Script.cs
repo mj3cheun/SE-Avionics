@@ -51,13 +51,13 @@ public class executor
             switch (operation[0])
             {
                 case "prefix":
-		    grid.LCD.debugWrite(operation[0], true);
-		    this.prefix = operation[1];
-		    break;
+                    grid.LCD.debugWrite(operation[0], true);
+                    this.prefix = operation[1];
+                    break;
 
-		case "nl":
-		    output += br + prefix;
-		    break;
+                case "nl":
+                    output += br + prefix;
+                    break;
 
                 case "viewportSize":
                     {
@@ -163,7 +163,7 @@ public class executor
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(numItems/float.Parse(args[++j]), xLength);
+                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength);
                                     break;
 
                                 case "displayPercentage":
@@ -214,6 +214,7 @@ public class executor
                     break;
 
                 default:
+                    grid.LCD.debugWrite("Unknown Command: " + operation[0], true);
                     break;
             }
         }
@@ -230,7 +231,6 @@ public class executor
 
 public class state
 {
-    IMyGridTerminalSystem _GridTerminalSystem;
     List<IMyTerminalBlock> batteries = new List<IMyTerminalBlock>();
     List<IMyTerminalBlock> reactors = new List<IMyTerminalBlock>();
     List<IMyTerminalBlock> cargo = new List<IMyTerminalBlock>();
@@ -450,10 +450,11 @@ public class display
     {
         for (int i = 0; i < displayPanels.Count; i++)
         {
+            grid.LCD.debugWrite("Executing Panel " + i, true);
             IMyTextPanel panel = (IMyTextPanel)displayPanels[i];
-            string privateText = panel.GetPrivateText();
+            string customData = panel.CustomData;
             executor thisDisplay = new executor();
-            panel.WritePublicText(thisDisplay.executeInstruction(privateText), false);
+            panel.WritePublicText(thisDisplay.executeInstruction(customData), false);
 
             panel.ShowPublicTextOnScreen();
             panel.UpdateVisual();
