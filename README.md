@@ -21,6 +21,10 @@ prefix:   ;
 
 The nl instruction adds a new line wherever the cursor is at.
 
+**invertBar**
+
+The invertBar instruction reverses the direction in which any added percentage bar travels thereafter from left to right, which is the default direction, to right to left. It takes one argument, which is a boolean setting invertBar true and false.
+
 **viewportSize**
 
 The viewportSize instruction sets the width and height that the output can use thereafter. It is primarily used for setting the width of percentage bars and the like. This setting can be used multiple times in the same instruction set. It has two arguments setting width and height.
@@ -82,3 +86,41 @@ totalBatteryStored:displayPercentageBar;
 **totalBatteryMax**
 
 The totalPowerAvailable instruction returns the maximum amount of power that can be stored by all of the ship's batteries in numerical form.
+
+**getShipInv**
+
+The getShipInv instruction is used to find the number of a specified item which are accessible to the programmable block by iterating through all available inventories at the moment the command is executed. The first argument is always the item identifier of the item that you want to enumerate. A full list of the valid item identifiers along with their common names can be found at the bottom of the document. Just following, there are three arguments that can be used:
+
+- displayPercentageBar:
+Returns the data in the form of a percentage bar. Requires a third argument, which specifies how many items it should take to reach 100%.
+
+- displayPercentage:
+Returns the data in the form of a numerical percentage. Requires a third argument, which specifies how many items it should take to reach 100%.
+
+- displayNumItems:
+Returns the number of specified item found in current grid.
+
+Examples
+```
+getShipInv:Missile200mm,displayPercentageBar, 100;
+getShipInv:Missile200mm,displayNumItems;
+```
+
+**getShipInvByConName**
+
+The getShipInvByConName instruction is used to find the number of a specified item which are accessible by the programmable block at the moment the command is executed. The first and second arguments are always the name of the targeted inventory and the item identifier of the item that you want to enumerate. A full list of the valid item identifiers along with their common names can be found at the bottom of the document. Just following, there are three arguments that can be used:
+
+- displayPercentageBar:
+Returns the data in the form of a percentage bar. Requires a fourth argument, which specifies how many items it should take to reach 100%.
+
+- displayPercentage:
+Returns the data in the form of a numerical percentage. Requires a fourth argument, which specifies how many items it should take to reach 100%.
+
+- displayNumItems:
+Returns the number of specified item found in current grid.
+
+Examples
+```
+getShipInvByConName:Connector 2,NATO_25x184mm,displayPercentageBar,1000;
+getShipInvByConName:Connector 2,NATO_25x184mm,displayNumItems;
+```

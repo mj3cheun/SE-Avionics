@@ -31,6 +31,7 @@ public class executor
 {
     public int xLength = 80;
     public int yLength = 50;
+    public bool invertBar = false;
     public string prefix = "";
     public string br = "\n";
     public string brDelimiter = "<br>";
@@ -48,7 +49,7 @@ public class executor
         {
             string[] operation = instructionSet[i].Replace("\n", "").Replace(brDelimiter, "\n").Split(argumentDelimiter);
 
-            switch (operation[0])
+            switch (operation[0].Trim())
             {
                 case "prefix":
                     grid.LCD.debugWrite(operation[0], true);
@@ -57,6 +58,11 @@ public class executor
 
                 case "nl":
                     output += br + prefix;
+                    break;
+
+                case "invertBar":
+                    grid.LCD.debugWrite(operation[0], true);
+                    this.invertBar = Convert.ToBoolean(operation[1]);
                     break;
 
                 case "viewportSize":
@@ -91,7 +97,7 @@ public class executor
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(percentage, xLength);
+                                    output += grid.LCD.renderPercentageBar(percentage, xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -127,7 +133,7 @@ public class executor
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(percentage, xLength);
+                                    output += grid.LCD.renderPercentageBar(percentage, xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -163,7 +169,7 @@ public class executor
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength);
+                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -179,11 +185,10 @@ public class executor
                                     break;
                             }
                         }
-                        output += br;
                     }
                     break;
 
-                case "getShipInvbyName":
+                case "getShipInvByConName":
                     {
                         grid.LCD.debugWrite(operation[0], true);
                         string[] args = operation[1].Split(subArgumentDelimiter);
@@ -194,7 +199,7 @@ public class executor
                             switch (args[j])
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength);
+                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -345,6 +350,7 @@ public class state
 
         for (int i = 0; i < itemsList.Count; i++)
         {
+            //grid.LCD.debugWrite(itemsList[i].Content.SubtypeName, true);
             invstr = itemsList[i].Content.SubtypeName;
             if (itemType == itemsList[i].Content.SubtypeName)
             {
@@ -357,7 +363,6 @@ public class state
 
     public float getShipInvbyName(string invName, string itemType)
     {
-        grid.LCD.debugWrite("INV START", true);
         List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
         List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
         grid._GridTerminalSystem.SearchBlocksOfName(invName, shipInv);
@@ -386,18 +391,6 @@ public class state
         }
 
         return numItems;
-    }
-
-    public int gatlingAmmAvailable()
-    {
-        int totalAmount = 0;
-        return totalAmount;
-    }
-
-    public int rocketAmmAvailable()
-    {
-        int totalAmount = 0;
-        return totalAmount;
     }
 
     public string returnFormattedPower(float power)
@@ -462,7 +455,7 @@ public class display
         }
     }
 
-    public string renderPercentageBar(float percentage, int xLength)
+    public string renderPercentageBar(float percentage, int xLength, bool invertBar = false)
     {
         string barStart = "[ ";
         string barEnd = " ]";
@@ -474,7 +467,7 @@ public class display
         float barFillNum = ((percentage) * (xLength - barStart.Length - barEnd.Length)) / barFill.Length;
         for (int i = barStart.Length + barEnd.Length - 2; i < xLength - barEmpty.Length - 1; i++)
         {
-            if (i < barFillNum + barStart.Length + barEnd.Length - 2)
+            if (((i < barFillNum + barStart.Length + barEnd.Length - 2) && (invertBar == false)) || ((i > Math.Abs(barFillNum + barStart.Length + barEnd.Length - 2 - xLength)) && (invertBar == true)))
             {
                 output += barFill;
             }
