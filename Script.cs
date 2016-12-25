@@ -4,12 +4,17 @@
 
 public static string LCDIdentifier = "[LCD]";
 public static string debugIdentifier = "[DEBUG]";
+public static string controllerIdentifier = "[MAIN CONTROL]";
 public static bool debugOn = true;
-public static int cycle;
+
+public static bool firstRun = true;
+public static navigation navigationService;
+public static double dLastRun;
+
 void Main()
 {
+    dLastRun = Runtime.TimeSinceLastRun.TotalSeconds;
     grid.initialize(GridTerminalSystem);
-    grid.LCD.debugWrite("TESTING START", false);
     grid.LCD.executeInstructions();
 
 }
@@ -24,6 +29,16 @@ public static class grid
         _GridTerminalSystem = GridTerminalSystem;
         LCD = new display();
         ship = new state();
+        grid.LCD.debugWrite("DEBUG START", false);
+        if (firstRun == true)
+        {
+            navigationService = new navigation();
+            firstRun = false;
+        }
+        else
+        {
+            navigationService.refresh();
+        }
     }
 }
 
@@ -231,6 +246,71 @@ public class executor
         output = (number < 10000) ? (String.Format("{0,-" + ((output.IndexOf('.') >= 3) ? "6" : "7") + "}", (String.Format("{0:###0.0}%", number)))) : "+9999%";
         output = (output.IndexOf('.') == 1) ? (output + " ") : (output);
         return (output.IndexOf('1') == -1) || (output.IndexOf('.') > 3) ? (output) : (output + " ");
+    }
+}
+
+public class navigation
+{
+    List<IMyTerminalBlock> controller = new List<IMyTerminalBlock>();
+    IMyShipController mainControl = null;
+    public position currentPosition;
+    public position pastPosition;
+
+    public navigation ()
+    {
+        grid._GridTerminalSystem.SearchBlocksOfName(controllerIdentifier, controller);
+        if(controller.Count > 0)
+        {
+            mainControl = controller[0] as IMyShipController;
+            this.refresh();
+        }
+    }
+
+    public void refresh ()
+    {
+        if(mainControl != null)
+        {
+            if (currentPosition != null)
+            {
+                pastPosition = currentPosition;
+            }
+            currentPosition = new position(mainControl);
+        }
+    }
+}
+
+public class position
+{
+    public double timeSinceLast;
+    public Vector3D currentPosition;
+    public double velocityMagnitude;
+    public Vector3D linearVelocity;
+    public Vector3D angularVelocity;
+    public Vector3D gravityVector;
+    public double gravityMagnitude;
+    public Vector3D forwardVector;
+    public Vector3D downVector;
+    public double altitude;
+
+    public position(IMyShipController reference)
+    {
+        MyShipVelocities shipVelocity = reference.GetShipVelocities();
+        MyShipMass shipMass = reference.CalculateShipMass();
+
+        timeSinceLast = dLastRun;
+        currentPosition = reference.GetPosition();
+        velocityMagnitude = reference.GetShipSpeed();
+        linearVelocity = shipVelocity.LinearVelocity;
+        angularVelocity = shipVelocity.AngularVelocity;
+        gravityVector = reference.GetNaturalGravity();
+        gravityMagnitude = gravityVector.Length();
+        forwardVector = reference.WorldMatrix.Forward;
+        downVector = reference.WorldMatrix.Down;
+        if (gravityMagnitude > 0)
+        {
+            reference.TryGetPlanetElevation(MyPlanetElevation.Surface, out altitude);
+
+        }
     }
 }
 
