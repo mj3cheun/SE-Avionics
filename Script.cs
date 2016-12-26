@@ -347,7 +347,9 @@ public class position
     public double gravityMagnitude;
     public Vector3D forwardVector;
     public Vector3D downVector;
+
     public double altitude;
+    public double sinkRate;
 
     public position(IMyShipController reference)
     {
@@ -366,10 +368,12 @@ public class position
         if (gravityMagnitude > 0)
         {
             reference.TryGetPlanetElevation(MyPlanetElevation.Surface, out altitude);
+            sinkRate = linearVelocity.Dot(Vector3D.Normalize(gravityVector));
         }
         else
         {
             altitude = -1;
+            sinkRate = 0;
         }
     }
 }
