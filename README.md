@@ -7,7 +7,7 @@ The SE Avionics suite prioritizes flexibility over ease of use. As result, one m
 
 Valid syntax which can be used to specify information displayed are listed below.
 
-##Instructions
+##Syntax
 **prefix**
 
 The prefix instruction adds the given argument to the beginnning of every new line thereafter. The argument can consist of whitespace.
@@ -41,6 +41,44 @@ The echo instruction is used to print text onto the screen. All characters excep
 Examples
 ```
 echo:This is the first line<br>This is the second line;
+```
+
+**getAirspeed**
+
+The getAirspeed instruction is used to display the speed of the ship relative to the air. There are three arguments that can be used:
+
+- displayPercentageBar:
+Returns the data in the form of a percentage bar. Requires a third argument, which specifies how fast the ship should be going to reach 100%.
+
+- displayPercentage:
+Returns the data in the form of a numerical percentage. Requires a third argument, which specifies how fast the ship should be going to reach 100%.
+
+- displayAirspeed:
+Returns the airspeed in numerical form.
+
+Examples
+```
+getAirspeed:displayPercentageBar,105;
+getAirspeed:displayAirspeed;
+```
+
+**getAltimeter**
+
+The getAltimeter instruction is used to display the altitude of the ship relative to the ground. There are three arguments that can be used:
+
+- displayPercentageBar:
+Returns the data in the form of a percentage bar. Requires a third argument, which specifies how high the ship should be to reach 100%.
+
+- displayPercentage:
+Returns the data in the form of a numerical percentage. Requires a third argument, which specifies how high the ship should be to reach 100%.
+
+- displayAltitude:
+Returns the altitude in numerical form.
+
+Examples
+```
+getAltimeter:displayPercentageBar,5000;
+getAltimeter:displayAltitude;
 ```
 
 **totalPowerUsed**

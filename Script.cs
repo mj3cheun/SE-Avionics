@@ -16,7 +16,6 @@ void Main()
     dLastRun = Runtime.TimeSinceLastRun.TotalSeconds;
     grid.initialize(GridTerminalSystem);
     grid.LCD.executeInstructions();
-
 }
 
 public static class grid
@@ -96,6 +95,64 @@ public class executor
                         for (int j = 1; j < operation.Length; j++)
                         {
                             output += operation[j];
+                        }
+                    }
+                    break;
+
+                case "getAirspeed":
+                    {
+                        grid.LCD.debugWrite(operation[0], true);
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            switch (args[j])
+                            {
+                                case "displayPercentageBar":
+                                    output += grid.LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]), xLength, invertBar);
+                                    break;
+
+                                case "displayPercentage":
+                                    output += formatNumberPercentage((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]));
+                                    break;
+
+                                case "displayAirspeed":
+                                    output += navigationService.currentPosition.velocityMagnitude.ToString() + "m/s";
+                                    break;
+
+                                default:
+                                    output += "UNKNOWN OPTION: " + args[j];
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+
+                case "getAltimeter":
+                    {
+                        grid.LCD.debugWrite(operation[0], true);
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        for (int j = 0; j < args.Length; j++)
+                        {
+                            switch (args[j])
+                            {
+                                case "displayPercentageBar":
+                                    output += grid.LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[++j]), xLength, invertBar);
+                                    break;
+
+                                case "displayPercentage":
+                                    output += formatNumberPercentage((float)navigationService.currentPosition.altitude / float.Parse(args[++j]));
+                                    break;
+
+                                case "displayAltitude":
+                                    output += navigationService.currentPosition.altitude.ToString() + "m";
+                                    break;
+
+                                default:
+                                    output += "UNKNOWN OPTION: " + args[j];
+                                    break;
+                            }
                         }
                     }
                     break;
@@ -309,7 +366,10 @@ public class position
         if (gravityMagnitude > 0)
         {
             reference.TryGetPlanetElevation(MyPlanetElevation.Surface, out altitude);
-
+        }
+        else
+        {
+            altitude = -1;
         }
     }
 }
