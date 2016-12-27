@@ -4,40 +4,41 @@
 
 public static string LCDIdentifier = "[LCD]";
 public static string debugIdentifier = "[DEBUG]";
-public static string controllerIdentifier = "[MAIN CONTROL]";
+public static string controllerIdentifier = "[MAIN]";
+public static string warningSoundIdentifier = "[WARNING]";
 public static bool debugOn = true;
 
 public static bool firstRun = true;
+public static IMyGridTerminalSystem _GridTerminalSystem;
+public static display LCD;
+public static state ship;
 public static navigation navigationService;
 public static double dLastRun;
+public static double elapsedTime;
 
 void Main()
 {
     dLastRun = Runtime.TimeSinceLastRun.TotalSeconds;
-    grid.initialize(GridTerminalSystem);
-    grid.LCD.executeInstructions();
+    elapsedTime += dLastRun;
+    _GridTerminalSystem = GridTerminalSystem;
+    initialize();
+    LCD.executeInstructions();
 }
 
-public static class grid
+public static void initialize()
 {
-    public static IMyGridTerminalSystem _GridTerminalSystem;
-    public static display LCD;
-    public static state ship;
-    public static void initialize(IMyGridTerminalSystem GridTerminalSystem)
+    LCD = new display();
+    LCD.debugWrite("DEBUG START", false);
+    if (firstRun == true)
     {
-        _GridTerminalSystem = GridTerminalSystem;
-        LCD = new display();
         ship = new state();
-        grid.LCD.debugWrite("DEBUG START", false);
-        if (firstRun == true)
-        {
-            navigationService = new navigation();
-            firstRun = false;
-        }
-        else
-        {
-            navigationService.refresh();
-        }
+        navigationService = new navigation();
+        firstRun = false;
+    }
+    else
+    {
+        ship.refresh();
+        navigationService.refresh();
     }
 }
 
@@ -53,7 +54,7 @@ public class executor
     public char instructionDelimiter = ';';
     public char argumentDelimiter = ':';
     public char subArgumentDelimiter = ',';
-    public string output = "";
+    private string output = "";
 
     public string executeInstruction(string instructions)
     {
@@ -66,7 +67,7 @@ public class executor
             switch (operation[0].Trim())
             {
                 case "prefix":
-                    grid.LCD.debugWrite(operation[0], true);
+                    LCD.debugWrite(operation[0], true);
                     this.prefix = operation[1];
                     break;
 
@@ -75,23 +76,23 @@ public class executor
                     break;
 
                 case "invertBar":
-                    grid.LCD.debugWrite(operation[0], true);
+                    LCD.debugWrite(operation[0], true);
                     this.invertBar = Convert.ToBoolean(operation[1]);
                     break;
 
                 case "viewportSize":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         this.xLength = int.Parse(args[0]);
                         this.yLength = int.Parse(args[1]);
-                        grid.LCD.debugWrite(this.xLength.ToString() + "," + this.yLength.ToString(), true);
+                        LCD.debugWrite(this.xLength.ToString() + "," + this.yLength.ToString(), true);
                     }
                     break;
 
                 case "echo":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
                         for (int j = 1; j < operation.Length; j++)
                         {
                             output += operation[j];
@@ -101,15 +102,15 @@ public class executor
 
                 case "getAirspeed":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]), xLength, invertBar);
+                                    output += LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -130,15 +131,15 @@ public class executor
 
                 case "getAltimeter":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[++j]), xLength, invertBar);
+                                    output += LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -159,17 +160,17 @@ public class executor
 
                 case "totalPowerUsed":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
-                        float powerUsed = grid.ship.powerUsed();
-                        float percentage = powerUsed / grid.ship.powerAvailable();
+                        LCD.debugWrite(operation[0], true);
+                        float powerUsed = ship.powerUsed();
+                        float percentage = powerUsed / ship.powerAvailable();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(percentage, xLength, invertBar);
+                                    output += LCD.renderPercentageBar(percentage, xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -177,7 +178,7 @@ public class executor
                                     break;
 
                                 case "displayPowerUsed":
-                                    output += grid.ship.returnFormattedPower(powerUsed);
+                                    output += ship.returnFormattedPower(powerUsed);
                                     break;
 
                                 default:
@@ -189,23 +190,23 @@ public class executor
                     break;
 
                 case "totalPowerAvailable":
-                    grid.LCD.debugWrite(operation[0], true);
-                    output += grid.ship.returnFormattedPower(grid.ship.powerAvailable());
+                    LCD.debugWrite(operation[0], true);
+                    output += ship.returnFormattedPower(ship.powerAvailable());
                     break;
 
                 case "totalBatteryStored":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
-                        float batteryStored = grid.ship.batteryPowerStored();
-                        float percentage = batteryStored / grid.ship.batteryPowerMax();
+                        LCD.debugWrite(operation[0], true);
+                        float batteryStored = ship.batteryPowerStored();
+                        float percentage = batteryStored / ship.batteryPowerMax();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(percentage, xLength, invertBar);
+                                    output += LCD.renderPercentageBar(percentage, xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -213,7 +214,7 @@ public class executor
                                     break;
 
                                 case "displayBatteryStored":
-                                    output += grid.ship.returnFormattedPower(batteryStored) + "h";
+                                    output += ship.returnFormattedPower(batteryStored) + "h";
                                     break;
 
                                 default:
@@ -225,23 +226,23 @@ public class executor
                     break;
 
                 case "totalBatteryMax":
-                    grid.LCD.debugWrite(operation[0], true);
-                    output += grid.ship.returnFormattedPower(grid.ship.batteryPowerMax()) + "h";
+                    LCD.debugWrite(operation[0], true);
+                    output += ship.returnFormattedPower(ship.batteryPowerMax()) + "h";
                     break;
 
                 case "getShipInv":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            float numItems = grid.ship.getShipInv(args[j++]);
+                            float numItems = ship.getShipInv(args[j++]);
 
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
+                                    output += LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -262,16 +263,16 @@ public class executor
 
                 case "getShipInvByConName":
                     {
-                        grid.LCD.debugWrite(operation[0], true);
+                        LCD.debugWrite(operation[0], true);
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         for (int j = 0; j < args.Length; j++)
                         {
-                            float numItems = grid.ship.getShipInvbyName(args[j++], args[j++]);
+                            float numItems = ship.getShipInvbyName(args[j++], args[j++]);
 
-                            switch (args[j])
+                            switch (args[j].Trim())
                             {
                                 case "displayPercentageBar":
-                                    output += grid.LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
+                                    output += LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
                                     break;
 
                                 case "displayPercentage":
@@ -290,12 +291,32 @@ public class executor
                     }
                     break;
 
+                case "terrainWarning":
+                    {
+                        LCD.debugWrite(operation[0], true);
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        double secondsToImpactWarn = Convert.ToDouble(args[0]);
+                        double speedThreshold = Convert.ToDouble(args[1]);
+                        string warningMessage = args[2];
+
+                        if((ship.secondsToDisplace(navigationService.currentPosition.altitude, navigationService.currentPosition.sinkRate, navigationService.currentPosition.sinkRateAcceleration) < secondsToImpactWarn) && (navigationService.currentPosition.sinkRate > speedThreshold))
+                        {
+                            output += warningMessage;
+                            ship.changeNamedSoundState(warningSoundIdentifier, true);
+                        }
+                        else
+                        {
+                            ship.changeNamedSoundState(warningSoundIdentifier, false);
+                        }
+                    }
+                    break;
+
                 default:
-                    grid.LCD.debugWrite("Unknown Command: " + operation[0], true);
+                    LCD.debugWrite("Unknown Command: " + operation[0], true);
                     break;
             }
         }
-        return output;
+        return output != "" ? output : " ";
     }
 
     string formatNumberPercentage(float number)
@@ -315,7 +336,7 @@ public class navigation
 
     public navigation ()
     {
-        grid._GridTerminalSystem.SearchBlocksOfName(controllerIdentifier, controller);
+        _GridTerminalSystem.SearchBlocksOfName(controllerIdentifier, controller);
         if(controller.Count > 0)
         {
             mainControl = controller[0] as IMyShipController;
@@ -331,27 +352,29 @@ public class navigation
             {
                 pastPosition = currentPosition;
             }
-            currentPosition = new position(mainControl);
+            currentPosition = new position(mainControl, pastPosition);
         }
     }
 }
 
 public class position
 {
-    public double timeSinceLast;
-    public Vector3D currentPosition;
-    public double velocityMagnitude;
-    public Vector3D linearVelocity;
-    public Vector3D angularVelocity;
-    public Vector3D gravityVector;
-    public double gravityMagnitude;
-    public Vector3D forwardVector;
-    public Vector3D downVector;
+    public readonly double timeSinceLast;
+    public readonly Vector3D currentPosition;
+    public readonly double velocityMagnitude;
+    public readonly Vector3D linearVelocity;
+    public readonly Vector3D angularVelocity;
+    public readonly double linearAcceleration;
+    public readonly Vector3D gravityVector;
+    public readonly double gravityMagnitude;
+    public readonly Vector3D forwardVector;
+    public readonly Vector3D downVector;
 
-    public double altitude;
-    public double sinkRate;
+    public readonly double altitude;
+    public readonly double sinkRate;
+    public readonly double sinkRateAcceleration;
 
-    public position(IMyShipController reference)
+    public position(IMyShipController reference, position prevPosition = null)
     {
         MyShipVelocities shipVelocity = reference.GetShipVelocities();
         MyShipMass shipMass = reference.CalculateShipMass();
@@ -361,19 +384,23 @@ public class position
         velocityMagnitude = reference.GetShipSpeed();
         linearVelocity = shipVelocity.LinearVelocity;
         angularVelocity = shipVelocity.AngularVelocity;
+        linearAcceleration = prevPosition != null ? ((velocityMagnitude - prevPosition.velocityMagnitude) / timeSinceLast) : 0;
         gravityVector = reference.GetNaturalGravity();
         gravityMagnitude = gravityVector.Length();
         forwardVector = reference.WorldMatrix.Forward;
         downVector = reference.WorldMatrix.Down;
+
         if (gravityMagnitude > 0)
         {
             reference.TryGetPlanetElevation(MyPlanetElevation.Surface, out altitude);
             sinkRate = linearVelocity.Dot(Vector3D.Normalize(gravityVector));
+            sinkRateAcceleration = prevPosition != null ? ((sinkRate - prevPosition.sinkRate) / timeSinceLast) : 0;
         }
         else
         {
             altitude = -1;
             sinkRate = 0;
+            sinkRateAcceleration = 0;
         }
     }
 }
@@ -386,20 +413,24 @@ public class state
     List<IMyTerminalBlock> reloadableRockets = new List<IMyTerminalBlock>();
     List<IMyTerminalBlock> gatlings = new List<IMyTerminalBlock>();
     public Dictionary<string, float> powerConversion = new Dictionary<string, float>();
+    public Dictionary<string, bool> soundStates = new Dictionary<string, bool>();
 
     public state()
     {
         //Instantiate Variables
-        grid._GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactors);
-        grid._GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries);
-        grid._GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
-        grid._GridTerminalSystem.GetBlocksOfType<IMySmallMissileLauncherReload>(reloadableRockets);
-        grid._GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(gatlings);
-
         powerConversion.Add("W", 1);
         powerConversion.Add("k", 1000);
         powerConversion.Add("M", 1000000);
         powerConversion.Add("G", 1000000000);
+    }
+
+    public void refresh()
+    {
+        _GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactors);
+        _GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries);
+        _GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(cargo);
+        _GridTerminalSystem.GetBlocksOfType<IMySmallMissileLauncherReload>(reloadableRockets);
+        _GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(gatlings);
     }
 
     public float powerUsed()
@@ -410,7 +441,7 @@ public class state
             if (reactors[i].DetailedInfo.Contains("Current Output"))
             {
                 var iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Current Output") + 16);
-                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         for (int i = 0; i < batteries.Count; i++)
@@ -418,7 +449,7 @@ public class state
             if (batteries[i].DetailedInfo.Contains("Current Output"))
             {
                 var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Current Output") + 16);
-                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return totalOutput;
@@ -432,7 +463,7 @@ public class state
             if ((reactors[i].DetailedInfo.Contains("Current Output")) && reactors[i].IsWorking)
             {
                 var iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Max Output") + 12);
-                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         for (int i = 0; i < batteries.Count; i++)
@@ -440,7 +471,7 @@ public class state
             if ((batteries[i].DetailedInfo.Contains("Current Output")) && batteries[i].IsWorking)
             {
                 var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Output") + 12);
-                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return availableOutput;
@@ -454,7 +485,7 @@ public class state
             if (batteries[i].DetailedInfo.Contains("Max Stored Power"))
             {
                 var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Stored Power") + 18);
-                maxPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                maxPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return maxPower;
@@ -468,7 +499,7 @@ public class state
             if (batteries[i].DetailedInfo.Contains("\nStored power"))
             {
                 var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Stored power") + 14);
-                storedPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (grid.ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? grid.ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                storedPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return storedPower;
@@ -478,7 +509,7 @@ public class state
     {
         List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
         List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
-        grid._GridTerminalSystem.GetBlocks(shipInv);
+        _GridTerminalSystem.GetBlocks(shipInv);
         float numItems = 0;
         string invstr = "";
 
@@ -494,7 +525,7 @@ public class state
 
         for (int i = 0; i < itemsList.Count; i++)
         {
-            //grid.LCD.debugWrite(itemsList[i].Content.SubtypeName, true);
+            //LCD.debugWrite(itemsList[i].Content.SubtypeName, true);
             invstr = itemsList[i].Content.SubtypeName;
             if (itemType == itemsList[i].Content.SubtypeName)
             {
@@ -509,7 +540,7 @@ public class state
     {
         List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
         List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
-        grid._GridTerminalSystem.SearchBlocksOfName(invName, shipInv);
+        _GridTerminalSystem.SearchBlocksOfName(invName, shipInv);
         float numItems = 0;
         string invstr = "";
 
@@ -525,8 +556,8 @@ public class state
 
         for (int i = 0; i < itemsList.Count; i++)
         {
-            grid.LCD.debugWrite(itemsList[i].Content.SubtypeName.ToString(), true);
-            grid.LCD.debugWrite(itemsList[i].Amount.ToString(), true);
+            LCD.debugWrite(itemsList[i].Content.SubtypeName.ToString(), true);
+            LCD.debugWrite(itemsList[i].Amount.ToString(), true);
             invstr = itemsList[i].Content.SubtypeName;
             if (itemType == itemsList[i].Content.SubtypeName)
             {
@@ -535,6 +566,25 @@ public class state
         }
 
         return numItems;
+    }
+
+    public void changeNamedSoundState(string name, bool state)
+    {
+        if (!soundStates.ContainsKey(name))
+        {
+            soundStates[name] = !state;
+        }
+        if(state != soundStates[name])
+        {
+            List<IMyTerminalBlock> soundBlockList = new List<IMyTerminalBlock>();
+            _GridTerminalSystem.SearchBlocksOfName(name, soundBlockList);
+            LCD.debugWrite(soundBlockList.Count.ToString(), true);
+            foreach (IMyTerminalBlock soundBlock in soundBlockList)
+            {
+                ((IMySoundBlock)soundBlock).ApplyAction(state ? "PlaySound" : "StopSound");
+            }
+            soundStates[name] = state;
+        }
     }
 
     public string returnFormattedPower(float power)
@@ -556,6 +606,25 @@ public class state
             return power.ToString() + " W";
         }
     }
+
+    public double secondsToDisplace(double displacement, double velocity = 0, double acceleration = 0)
+    {
+        double seconds = 0;
+        if(acceleration != 0)
+        {
+            seconds = (Math.Sqrt(2.0 * acceleration * displacement + Math.Pow(velocity, 2.0)) - velocity) / acceleration;
+        }
+        else if(velocity != 0)
+        {
+            seconds = displacement / velocity;
+        }
+        else
+        {
+            seconds = displacement == 0 ? 0 : long.MaxValue;
+        }
+
+        return seconds;
+    }
 }
 
 public class display
@@ -567,9 +636,9 @@ public class display
     {
         if (debugOn)
         {
-            grid._GridTerminalSystem.SearchBlocksOfName(debugIdentifier, debugPanels);
+            _GridTerminalSystem.SearchBlocksOfName(debugIdentifier, debugPanels);
         }
-        grid._GridTerminalSystem.SearchBlocksOfName(LCDIdentifier, displayPanels);
+        _GridTerminalSystem.SearchBlocksOfName(LCDIdentifier, displayPanels);
     }
 
     public void debugWrite(string write, bool append)
@@ -587,7 +656,7 @@ public class display
     {
         for (int i = 0; i < displayPanels.Count; i++)
         {
-            grid.LCD.debugWrite("Executing Panel " + i, true);
+            LCD.debugWrite("Executing Panel " + i, true);
             IMyTextPanel panel = (IMyTextPanel)displayPanels[i];
             string customData = panel.CustomData;
             executor thisDisplay = new executor();

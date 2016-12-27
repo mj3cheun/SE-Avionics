@@ -162,3 +162,12 @@ Examples
 getShipInvByConName:Connector 2,NATO_25x184mm,displayPercentageBar,1000;
 getShipInvByConName:Connector 2,NATO_25x184mm,displayNumItems;
 ```
+
+**terrainWarning**
+
+The terrainWarning instruction is used to display a warning when the program detects an imminent crash based on the sink rate, sink rate acceleration, and altitude. In addition, it will try to activate any sound blocks with the [WARNING] identifier. There are three arguments that must follow afterwards. The next argument is the time-to-impact threshold, which sets the minimum calculated time to impact in seconds which is required to trigger the warning. The next argument is the minimum speed threshold, which turns off the warning under a certain speed in m/s. The last argument sets the text to be displayed on the LCD when the warning is active.
+
+Examples
+```
+terrainWarning:4,25,   TERRAIN;
+```
