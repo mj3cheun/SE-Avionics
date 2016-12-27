@@ -93,9 +93,32 @@ public class executor
                 case "echo":
                     {
                         LCD.debugWrite(operation[0], true);
+
                         for (int j = 1; j < operation.Length; j++)
                         {
                             output += operation[j];
+                        }
+                    }
+                    break;
+
+                case "getRealTime":
+                    {
+                        LCD.debugWrite(operation[0], true);
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        switch (args[0].Trim())
+                        {
+                            case "24hr":
+                                output += DateTime.Now.ToString("HH:mm:ss", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+                                break;
+
+                            case "12hr":
+                                output += DateTime.Now.ToString("hh:mm:ss tt", System.Globalization.DateTimeFormatInfo.InvariantInfo);
+                                break;
+
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;

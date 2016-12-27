@@ -43,6 +43,22 @@ Examples
 echo:This is the first line<br>This is the second line;
 ```
 
+**getRealTime**
+
+The getRealTime instruction is used to print the time on the screen using computer time settings. There are two arguments that can be used:
+
+- 24hr:
+Returns the time using a 24 hour format, which includes hour, minute, and second.
+
+- 12hr:
+Returns the time using a 12 hour format, which includes hour, minute, second, and AM or PM.
+
+Examples
+```
+getRealTime:24hr;
+getRealTime:12hr;
+```
+
 **getAirspeed**
 
 The getAirspeed instruction is used to display the speed of the ship relative to the air. There are three arguments that can be used:
