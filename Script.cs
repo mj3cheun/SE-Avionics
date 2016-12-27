@@ -128,26 +128,23 @@ public class executor
                         LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        switch (args[0].Trim())
                         {
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]), xLength, invertBar);
-                                    break;
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[1]), xLength, invertBar);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[++j]));
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[1]));
+                                break;
 
-                                case "displayAirspeed":
-                                    output += navigationService.currentPosition.velocityMagnitude.ToString() + "m/s";
-                                    break;
+                            case "displayAirspeed":
+                                output += navigationService.currentPosition.velocityMagnitude.ToString() + "m/s";
+                                break;
 
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -157,26 +154,23 @@ public class executor
                         LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        switch (args[0].Trim())
                         {
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[++j]), xLength, invertBar);
-                                    break;
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[1]), xLength, invertBar);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage((float)navigationService.currentPosition.altitude / float.Parse(args[++j]));
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage((float)navigationService.currentPosition.altitude / float.Parse(args[1]));
+                                break;
 
-                                case "displayAltitude":
-                                    output += navigationService.currentPosition.altitude.ToString() + "m";
-                                    break;
+                            case "displayAltitude":
+                                output += navigationService.currentPosition.altitude.ToString() + "m";
+                                break;
 
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -188,26 +182,23 @@ public class executor
                         float percentage = powerUsed / ship.powerAvailable();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        switch (args[0].Trim())
                         {
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar(percentage, xLength, invertBar);
-                                    break;
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar(percentage, xLength, invertBar);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage(percentage * 100);
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage(percentage * 100);
+                                break;
 
-                                case "displayPowerUsed":
-                                    output += ship.returnFormattedPower(powerUsed);
-                                    break;
+                            case "displayPowerUsed":
+                                output += ship.returnFormattedPower(powerUsed);
+                                break;
 
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -224,26 +215,23 @@ public class executor
                         float percentage = batteryStored / ship.batteryPowerMax();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        switch (args[0].Trim())
                         {
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar(percentage, xLength, invertBar);
-                                    break;
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar(percentage, xLength, invertBar);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage(percentage * 100);
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage(percentage * 100);
+                                break;
 
-                                case "displayBatteryStored":
-                                    output += ship.returnFormattedPower(batteryStored) + "h";
-                                    break;
+                            case "displayBatteryStored":
+                                output += ship.returnFormattedPower(batteryStored) + "h";
+                                break;
 
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -258,28 +246,25 @@ public class executor
                         LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        float numItems = ship.getShipInv(args[0]);
+
+                        switch (args[1].Trim())
                         {
-                            float numItems = ship.getShipInv(args[j++]);
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar(numItems / float.Parse(args[2]), xLength, invertBar);
+                                break;
 
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage(numItems / float.Parse(args[2]) * 100);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage(numItems / float.Parse(args[++j]) * 100);
-                                    break;
+                            case "displayNumItems":
+                                output += numItems;
+                                break;
 
-                                case "displayNumItems":
-                                    output += numItems;
-                                    break;
-
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -287,29 +272,27 @@ public class executor
                 case "getShipInvByConName":
                     {
                         LCD.debugWrite(operation[0], true);
+
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        for (int j = 0; j < args.Length; j++)
+                        float numItems = ship.getShipInvbyName(args[0], args[1]);
+
+                        switch (args[2].Trim())
                         {
-                            float numItems = ship.getShipInvbyName(args[j++], args[j++]);
+                            case "displayPercentageBar":
+                                output += LCD.renderPercentageBar(numItems / float.Parse(args[3]), xLength, invertBar);
+                                break;
 
-                            switch (args[j].Trim())
-                            {
-                                case "displayPercentageBar":
-                                    output += LCD.renderPercentageBar(numItems / float.Parse(args[++j]), xLength, invertBar);
-                                    break;
+                            case "displayPercentage":
+                                output += formatNumberPercentage(numItems / float.Parse(args[3]) * 100);
+                                break;
 
-                                case "displayPercentage":
-                                    output += formatNumberPercentage(numItems / float.Parse(args[++j]) * 100);
-                                    break;
+                            case "displayNumItems":
+                                output += numItems.ToString();
+                                break;
 
-                                case "displayNumItems":
-                                    output += numItems.ToString();
-                                    break;
-
-                                default:
-                                    output += "UNKNOWN OPTION: " + args[j];
-                                    break;
-                            }
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
                         }
                     }
                     break;
@@ -317,6 +300,7 @@ public class executor
                 case "terrainWarning":
                     {
                         LCD.debugWrite(operation[0], true);
+
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         double secondsToImpactWarn = Convert.ToDouble(args[0]);
                         double speedThreshold = Convert.ToDouble(args[1]);
