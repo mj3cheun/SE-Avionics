@@ -680,7 +680,7 @@ public class display
         float barFillNum = ((percentage) * (xLength - barStart.Length - barEnd.Length)) / barFill.Length;
         for (int i = barStart.Length + barEnd.Length - 2; i < xLength - barEmpty.Length - 1; i++)
         {
-            if (((i < barFillNum + barStart.Length + barEnd.Length - 2) && (invertBar == false)) || ((i > Math.Abs(barFillNum + barStart.Length + barEnd.Length - 2 - xLength)) && (invertBar == true)))
+            if (((i < barFillNum + barStart.Length + barEnd.Length - 2) && (invertBar == false)) || ((i > -(barFillNum + barStart.Length + barEnd.Length - 2 - xLength)) && (invertBar == true)))
             {
                 output += barFill;
             }
