@@ -196,3 +196,12 @@ Examples
 ```
 terrainWarning:4,25,   TERRAIN;
 ```
+
+**groundGearWarning**
+
+The groundGearWarning instruction is used to display a warning when the program detects that all landing gears labeled with the ground gear identifier, which by default is "[GROUND]", are locked. If only a fraction of the gears are locked, the warning will not show. It takes one argument, which sets the text that is displayed on the LCD when the warning is active.
+
+Examples
+```
+groundGearWarning:  LOCKED;
+```

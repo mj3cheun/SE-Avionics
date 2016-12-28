@@ -6,6 +6,7 @@ public static string LCDIdentifier = "[LCD]";
 public static string debugIdentifier = "[DEBUG]";
 public static string controllerIdentifier = "[MAIN]";
 public static string warningSoundIdentifier = "[WARNING]";
+public static string groundGearIdentifier = "[GROUND]";
 public static bool debugOn = true;
 
 public static bool firstRun = true;
@@ -329,6 +330,20 @@ public class executor
                     }
                     break;
 
+                case "groundGearWarning":
+                    {
+                        LCD.debugWrite(operation[0], true);
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        string warningMessage = args[0];
+
+                        if (ship.getLandingGearStatus(groundGearIdentifier) == true)
+                        {
+                            output += warningMessage;
+                        }
+                    }
+                    break;
+
                 default:
                     LCD.debugWrite("Unknown Command: " + operation[0], true);
                     break;
@@ -521,6 +536,30 @@ public class state
             }
         }
         return storedPower;
+    }
+
+    public bool getLandingGearStatus(string groundGearName)
+    {
+        List<IMyTerminalBlock> groundGearList = new List<IMyTerminalBlock>();
+        _GridTerminalSystem.SearchBlocksOfName(groundGearName, groundGearList);
+        int numLockedGears = 0;
+
+        if(groundGearList.Count > 0)
+        {
+            foreach (IMyTerminalBlock groundGear in groundGearList)
+            {
+                StringBuilder lockState = new StringBuilder();
+                groundGear.GetActionWithName("SwitchLock").WriteValue(groundGear, lockState);
+
+                numLockedGears += (lockState.ToString() == "Locked") ? 1 : 0;
+            }
+        }
+        else
+        {
+            numLockedGears = 1;
+        }
+
+        return numLockedGears == groundGearList.Count ? true : false;
     }
 
     public float getShipInv(string itemType)
