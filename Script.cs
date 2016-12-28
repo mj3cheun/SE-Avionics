@@ -399,13 +399,21 @@ public class position
     public readonly Vector3D angularVelocity;
     public readonly double linearAcceleration;
     public readonly Vector3D gravityVector;
+    public readonly Vector3D gravityVectorNormal;
     public readonly double gravityMagnitude;
     public readonly Vector3D forwardVector;
-    public readonly Vector3D downVector;
+    public readonly Vector3D upVector;
+    public readonly Vector3D rightVector;
 
     public readonly double altitude;
     public readonly double sinkRate;
     public readonly double sinkRateAcceleration;
+
+    public readonly bool isInverted;
+    public readonly double bankRad;
+    public readonly double pitchRad;
+    public readonly double heading;
+    public readonly Vector3D trueNorth = new Vector3D(0.342063708833718, -0.704407897782847, -0.621934025954579);
 
     public position(IMyShipController reference, position prevPosition = null)
     {
@@ -421,20 +429,44 @@ public class position
         gravityVector = reference.GetNaturalGravity();
         gravityMagnitude = gravityVector.Length();
         forwardVector = reference.WorldMatrix.Forward;
-        downVector = reference.WorldMatrix.Down;
+        upVector = reference.WorldMatrix.Up;
+        rightVector = reference.WorldMatrix.Right;
 
         if (gravityMagnitude > 0)
         {
+            gravityVectorNormal = Vector3D.Normalize(gravityVector);
             reference.TryGetPlanetElevation(MyPlanetElevation.Surface, out altitude);
-            sinkRate = linearVelocity.Dot(Vector3D.Normalize(gravityVector));
+            sinkRate = linearVelocity.Dot(gravityVectorNormal);
             sinkRateAcceleration = prevPosition != null ? ((sinkRate - prevPosition.sinkRate) / timeSinceLast) : 0;
+
+            isInverted = (gravityVectorNormal - upVector).Length() < Math.Sqrt(2.0);
+            bankRad = Math.Acos(gravityVectorNormal.Dot(rightVector)) - Math.PI / 2.0;
+            pitchRad = Math.Acos(gravityVectorNormal.Dot(forwardVector)) - Math.PI / 2.0;
+            heading = computeHeading();
         }
         else
         {
+            gravityVectorNormal = gravityVector;
             altitude = -1;
             sinkRate = 0;
             sinkRateAcceleration = 0;
+
+            isInverted = false;
+            bankRad = 0;
+            pitchRad = 0;
+            heading = 0;
         }
+    }
+
+    private double computeHeading()
+    {
+        Vector3D eastVector = gravityVectorNormal.Cross(trueNorth);
+        Vector3D southVector = gravityVectorNormal.Cross(eastVector);
+        double eastComponent = forwardVector.Dot(eastVector);
+        double southComponent = forwardVector.Dot(southVector);
+
+        double headingAngle = Math.Atan(southComponent / eastComponent) + Math.PI / 2;
+        return headingAngle + (eastComponent > 0 ? 0 : Math.PI);
     }
 }
 
