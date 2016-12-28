@@ -46,6 +46,8 @@ public class executor
 {
     public int xLength = 80;
     public int yLength = 50;
+    public float fontSize = 1f;
+    public Color fontColor = Color.White;
     public bool invertBar = false;
     public string prefix = "";
     public string br = "\n";
@@ -87,6 +89,15 @@ public class executor
                         this.xLength = int.Parse(args[0]);
                         this.yLength = int.Parse(args[1]);
                         LCD.debugWrite(this.xLength.ToString() + "," + this.yLength.ToString(), true);
+                    }
+                    break;
+
+                case "setStyle":
+                    {
+                        LCD.debugWrite(operation[0], true);
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        this.fontSize = float.Parse(args[0]);
+                        this.fontColor = new Color(Int32.Parse(args[1]), Int32.Parse(args[2]), Int32.Parse(args[3]));
                     }
                     break;
 
@@ -669,6 +680,8 @@ public class display
             executor thisDisplay = new executor();
             panel.WritePublicText(thisDisplay.executeInstruction(customData), false);
 
+            panel.SetValue("FontColor", thisDisplay.fontColor);
+            panel.SetValue("FontSize", thisDisplay.fontSize);
             panel.ShowPublicTextOnScreen();
             panel.UpdateVisual();
             thisDisplay = null;

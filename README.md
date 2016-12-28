@@ -34,6 +34,15 @@ Examples
 viewportSize:30,1;
 ```
 
+**setStyle**
+
+The setStyle instruction sets the font size and colour of the LCD panel. Note that each LCD can only have font size and colour, repeated setStyle instructions will just result in the newest style overriding all others. It uses 4 arguments in total. The first argument sets the font size. The next three arguments set the colour using an RGB code, where each successive argument determines R, G, and B in order, each number representing the intensity of each colour ranging from 0 to 255.
+
+Examples
+```
+setStyle:4,255,0,0;
+```
+
 **echo**
 
 The echo instruction is used to print text onto the screen. All characters except delimiter and newline characters are valid input which will be displayed exactly as typed. In order to insert newline characters, either end the echo argument and use the nl instruction, or use the dedicated newline character, which by default is "\<br\>".
