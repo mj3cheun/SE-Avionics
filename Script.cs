@@ -143,11 +143,11 @@ public class executor
                         switch (args[0].Trim())
                         {
                             case "displayPercentageBar":
-                                output += LCD.renderPercentageBar((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[1]), xLength, invertBar);
+                                output += LCD.renderPercentageBar(navigationService.currentPosition.velocityMagnitude / double.Parse(args[1]), xLength, invertBar);
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage((float)navigationService.currentPosition.velocityMagnitude / float.Parse(args[1]));
+                                output += helper.roundNumber(navigationService.currentPosition.velocityMagnitude / double.Parse(args[1]) * 100.0) + "%";
                                 break;
 
                             case "displayAirspeed":
@@ -169,11 +169,11 @@ public class executor
                         switch (args[0].Trim())
                         {
                             case "displayPercentageBar":
-                                output += LCD.renderPercentageBar((float)navigationService.currentPosition.altitude / float.Parse(args[1]), xLength, invertBar);
+                                output += LCD.renderPercentageBar(navigationService.currentPosition.altitude / double.Parse(args[1]), xLength, invertBar);
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage((float)navigationService.currentPosition.altitude / float.Parse(args[1]));
+                                output += helper.roundNumber(navigationService.currentPosition.altitude / double.Parse(args[1]) * 100.0) + "%";
                                 break;
 
                             case "displayAltitude":
@@ -190,8 +190,8 @@ public class executor
                 case "totalPowerUsed":
                     {
                         LCD.debugWrite(operation[0], true);
-                        float powerUsed = ship.powerUsed();
-                        float percentage = powerUsed / ship.powerAvailable();
+                        double powerUsed = ship.powerUsed();
+                        double percentage = powerUsed / ship.powerAvailable();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         switch (args[0].Trim())
@@ -201,11 +201,11 @@ public class executor
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage(percentage * 100);
+                                output += helper.roundNumber(percentage * 100.0) + "%";
                                 break;
 
                             case "displayPowerUsed":
-                                output += ship.returnFormattedPower(powerUsed);
+                                output += helper.returnFormattedPower(powerUsed);
                                 break;
 
                             default:
@@ -217,14 +217,14 @@ public class executor
 
                 case "totalPowerAvailable":
                     LCD.debugWrite(operation[0], true);
-                    output += ship.returnFormattedPower(ship.powerAvailable());
+                    output += helper.returnFormattedPower(ship.powerAvailable());
                     break;
 
                 case "totalBatteryStored":
                     {
                         LCD.debugWrite(operation[0], true);
-                        float batteryStored = ship.batteryPowerStored();
-                        float percentage = batteryStored / ship.batteryPowerMax();
+                        double batteryStored = ship.batteryPowerStored();
+                        double percentage = batteryStored / ship.batteryPowerMax();
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
                         switch (args[0].Trim())
@@ -234,11 +234,11 @@ public class executor
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage(percentage * 100);
+                                output += helper.roundNumber(percentage * 100.0) + "%";
                                 break;
 
                             case "displayBatteryStored":
-                                output += ship.returnFormattedPower(batteryStored) + "h";
+                                output += helper.returnFormattedPower(batteryStored) + "h";
                                 break;
 
                             default:
@@ -250,7 +250,7 @@ public class executor
 
                 case "totalBatteryMax":
                     LCD.debugWrite(operation[0], true);
-                    output += ship.returnFormattedPower(ship.batteryPowerMax()) + "h";
+                    output += helper.returnFormattedPower(ship.batteryPowerMax()) + "h";
                     break;
 
                 case "getShipInv":
@@ -258,16 +258,16 @@ public class executor
                         LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        float numItems = ship.getShipInv(args[0]);
+                        double numItems = ship.getShipInv(args[0]);
 
                         switch (args[1].Trim())
                         {
                             case "displayPercentageBar":
-                                output += LCD.renderPercentageBar(numItems / float.Parse(args[2]), xLength, invertBar);
+                                output += LCD.renderPercentageBar(numItems / double.Parse(args[2]), xLength, invertBar);
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage(numItems / float.Parse(args[2]) * 100);
+                                output += helper.roundNumber(numItems / double.Parse(args[2]) * 100.0) + "%";
                                 break;
 
                             case "displayNumItems":
@@ -286,16 +286,16 @@ public class executor
                         LCD.debugWrite(operation[0], true);
 
                         string[] args = operation[1].Split(subArgumentDelimiter);
-                        float numItems = ship.getShipInvbyName(args[0], args[1]);
+                        double numItems = ship.getShipInvbyName(args[0], args[1]);
 
                         switch (args[2].Trim())
                         {
                             case "displayPercentageBar":
-                                output += LCD.renderPercentageBar(numItems / float.Parse(args[3]), xLength, invertBar);
+                                output += LCD.renderPercentageBar(numItems / double.Parse(args[3]), xLength, invertBar);
                                 break;
 
                             case "displayPercentage":
-                                output += formatNumberPercentage(numItems / float.Parse(args[3]) * 100);
+                                output += helper.roundNumber(numItems / double.Parse(args[3]) * 100.0) + "%";
                                 break;
 
                             case "displayNumItems":
@@ -318,7 +318,7 @@ public class executor
                         double speedThreshold = Convert.ToDouble(args[1]);
                         string warningMessage = args[2];
 
-                        if((ship.secondsToDisplace(navigationService.currentPosition.altitude, navigationService.currentPosition.sinkRate, navigationService.currentPosition.sinkRateAcceleration) < secondsToImpactWarn) && (navigationService.currentPosition.sinkRate > speedThreshold))
+                        if((helper.secondsToDisplace(navigationService.currentPosition.altitude, navigationService.currentPosition.sinkRate, navigationService.currentPosition.sinkRateAcceleration) < secondsToImpactWarn) && (navigationService.currentPosition.sinkRate > speedThreshold))
                         {
                             output += warningMessage;
                             ship.changeNamedSoundState(warningSoundIdentifier, true);
@@ -350,13 +350,6 @@ public class executor
             }
         }
         return output != "" ? output : " ";
-    }
-
-    string formatNumberPercentage(float number)
-    {
-        output = (number < 10000) ? (String.Format("{0,-" + ((output.IndexOf('.') >= 3) ? "6" : "7") + "}", (String.Format("{0:###0.0}%", number)))) : "+9999%";
-        output = (output.IndexOf('.') == 1) ? (output + " ") : (output);
-        return (output.IndexOf('1') == -1) || (output.IndexOf('.') > 3) ? (output) : (output + " ");
     }
 }
 
@@ -460,13 +453,13 @@ public class position
 
     private double computeHeading()
     {
-        Vector3D eastVector = gravityVectorNormal.Cross(trueNorth);
-        Vector3D southVector = gravityVectorNormal.Cross(eastVector);
-        double eastComponent = forwardVector.Dot(eastVector);
-        double southComponent = forwardVector.Dot(southVector);
+        Vector3D westVector = trueNorth.Cross(gravityVectorNormal);
+        Vector3D northVector = gravityVectorNormal.Cross(westVector);
+        double westComponent = forwardVector.Dot(westVector);
+        double northComponent = forwardVector.Dot(northVector);
 
-        double headingAngle = Math.Atan(southComponent / eastComponent) + Math.PI / 2;
-        return headingAngle + (eastComponent > 0 ? 0 : Math.PI);
+        double headingAngle = Math.Atan(northComponent / westComponent) + Math.PI / 2;
+        return headingAngle + (westComponent < 0 ? 0 : Math.PI);
     }
 }
 
@@ -477,17 +470,7 @@ public class state
     List<IMyTerminalBlock> cargo = new List<IMyTerminalBlock>();
     List<IMyTerminalBlock> reloadableRockets = new List<IMyTerminalBlock>();
     List<IMyTerminalBlock> gatlings = new List<IMyTerminalBlock>();
-    public Dictionary<string, float> powerConversion = new Dictionary<string, float>();
     public Dictionary<string, bool> soundStates = new Dictionary<string, bool>();
-
-    public state()
-    {
-        //Instantiate Variables
-        powerConversion.Add("W", 1);
-        powerConversion.Add("k", 1000);
-        powerConversion.Add("M", 1000000);
-        powerConversion.Add("G", 1000000000);
-    }
 
     public void refresh()
     {
@@ -498,73 +481,73 @@ public class state
         _GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(gatlings);
     }
 
-    public float powerUsed()
+    public double powerUsed()
     {
-        float totalOutput = 0;
+        double totalOutput = 0;
         for (int i = 0; i < reactors.Count; i++)
         {
             if (reactors[i].DetailedInfo.Contains("Current Output"))
             {
-                var iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Current Output") + 16);
-                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Current Output") + 16);
+                totalOutput += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         for (int i = 0; i < batteries.Count; i++)
         {
             if (batteries[i].DetailedInfo.Contains("Current Output"))
             {
-                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Current Output") + 16);
-                totalOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Current Output") + 16);
+                totalOutput += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return totalOutput;
     }
 
-    public float powerAvailable()
+    public double powerAvailable()
     {
-        float availableOutput = 0;
+        double availableOutput = 0;
         for (int i = 0; i < reactors.Count; i++)
         {
             if ((reactors[i].DetailedInfo.Contains("Current Output")) && reactors[i].IsWorking)
             {
-                var iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Max Output") + 12);
-                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = reactors[i].DetailedInfo.Substring(reactors[i].DetailedInfo.IndexOf("Max Output") + 12);
+                availableOutput += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         for (int i = 0; i < batteries.Count; i++)
         {
             if ((batteries[i].DetailedInfo.Contains("Current Output")) && batteries[i].IsWorking)
             {
-                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Output") + 12);
-                availableOutput += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Output") + 12);
+                availableOutput += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return availableOutput;
     }
 
-    public float batteryPowerMax()
+    public double batteryPowerMax()
     {
-        float maxPower = 0;
+        double maxPower = 0;
         for (int i = 0; i < batteries.Count; i++)
         {
             if (batteries[i].DetailedInfo.Contains("Max Stored Power"))
             {
-                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Stored Power") + 18);
-                maxPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Max Stored Power") + 18);
+                maxPower += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return maxPower;
     }
 
-    public float batteryPowerStored()
+    public double batteryPowerStored()
     {
-        float storedPower = 0;
+        double storedPower = 0;
         for (int i = 0; i < batteries.Count; i++)
         {
             if (batteries[i].DetailedInfo.Contains("\nStored power"))
             {
-                var iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Stored power") + 14);
-                storedPower += float.Parse(iString.Substring(0, iString.IndexOf(" "))) * (ship.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? ship.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
+                string iString = batteries[i].DetailedInfo.Substring(batteries[i].DetailedInfo.IndexOf("Stored power") + 14);
+                storedPower += double.Parse(iString.Substring(0, iString.IndexOf(" "))) * (helper.powerConversion.ContainsKey(iString.Substring(iString.IndexOf(" ") + 1, 1)) ? helper.powerConversion[iString.Substring(iString.IndexOf(" ") + 1, 1)] : 1);
             }
         }
         return storedPower;
@@ -594,17 +577,17 @@ public class state
         return numLockedGears == groundGearList.Count ? true : false;
     }
 
-    public float getShipInv(string itemType)
+    public double getShipInv(string itemType)
     {
         List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
         List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
         _GridTerminalSystem.GetBlocks(shipInv);
-        float numItems = 0;
+        double numItems = 0;
         string invstr = "";
 
         for (int i = 0; i < shipInv.Count; i++)
         {
-            var inv = shipInv[i].GetInventory(0);
+            IMyInventory inv = shipInv[i].GetInventory(0);
             if (inv != null)
             {
                 List<IMyInventoryItem> items = inv.GetItems();
@@ -618,24 +601,24 @@ public class state
             invstr = itemsList[i].Content.SubtypeName;
             if (itemType == itemsList[i].Content.SubtypeName)
             {
-                numItems += float.Parse(itemsList[i].Amount.ToString());
+                numItems += double.Parse(itemsList[i].Amount.ToString());
             }
         }
 
         return numItems;
     }
 
-    public float getShipInvbyName(string invName, string itemType)
+    public double getShipInvbyName(string invName, string itemType)
     {
         List<IMyTerminalBlock> shipInv = new List<IMyTerminalBlock>();
         List<IMyInventoryItem> itemsList = new List<IMyInventoryItem>();
         _GridTerminalSystem.SearchBlocksOfName(invName, shipInv);
-        float numItems = 0;
+        double numItems = 0;
         string invstr = "";
 
         for (int i = 0; i < shipInv.Count; i++)
         {
-            var inv = shipInv[i].GetInventory(0);
+            IMyInventory inv = shipInv[i].GetInventory(0);
             if (inv != null)
             {
                 List<IMyInventoryItem> items = inv.GetItems();
@@ -650,7 +633,7 @@ public class state
             invstr = itemsList[i].Content.SubtypeName;
             if (itemType == itemsList[i].Content.SubtypeName)
             {
-                numItems += float.Parse(itemsList[i].Amount.ToString());
+                numItems += double.Parse(itemsList[i].Amount.ToString());
             }
         }
 
@@ -674,45 +657,6 @@ public class state
             }
             soundStates[name] = state;
         }
-    }
-
-    public string returnFormattedPower(float power)
-    {
-        if (power > this.powerConversion["G"])
-        {
-            return (power / this.powerConversion["G"]).ToString() + " GW";
-        }
-        else if (power > this.powerConversion["M"])
-        {
-            return (power / this.powerConversion["M"]).ToString() + " MW";
-        }
-        else if (power > this.powerConversion["k"])
-        {
-            return (power / this.powerConversion["k"]).ToString() + " kW";
-        }
-        else
-        {
-            return power.ToString() + " W";
-        }
-    }
-
-    public double secondsToDisplace(double displacement, double velocity = 0, double acceleration = 0)
-    {
-        double seconds = 0;
-        if(acceleration != 0)
-        {
-            seconds = (Math.Sqrt(2.0 * acceleration * displacement + Math.Pow(velocity, 2.0)) - velocity) / acceleration;
-        }
-        else if(velocity != 0)
-        {
-            seconds = displacement / velocity;
-        }
-        else
-        {
-            seconds = displacement == 0 ? 0 : long.MaxValue;
-        }
-
-        return seconds;
     }
 }
 
@@ -759,7 +703,7 @@ public class display
         }
     }
 
-    public string renderPercentageBar(float percentage, int xLength, bool invertBar = false)
+    public string renderPercentageBar(double percentage, int xLength, bool invertBar = false)
     {
         string barStart = "[ ";
         string barEnd = " ]";
@@ -768,7 +712,7 @@ public class display
 
         string output = barStart;
 
-        float barFillNum = ((percentage) * (xLength - barStart.Length - barEnd.Length)) / barFill.Length;
+        double barFillNum = ((percentage) * (xLength - barStart.Length - barEnd.Length)) / barFill.Length;
         for (int i = barStart.Length + barEnd.Length - 2; i < xLength - barEmpty.Length - 1; i++)
         {
             if (((i < barFillNum + barStart.Length + barEnd.Length - 2) && (invertBar == false)) || ((i > -(barFillNum + barStart.Length + barEnd.Length - 2 - xLength)) && (invertBar == true)))
@@ -783,5 +727,76 @@ public class display
         }
 
         return output + barEnd;
+    }
+}
+
+static class helper
+{
+    public static Dictionary<string, double> powerConversion = new Dictionary<string, double>
+    {
+        {"W", 1.0},
+        {"k", 1000.0},
+        {"M", 1000000.0},
+        {"G", 1000000000.0}
+    };
+
+    public static string returnFormattedPower(double power)
+    {
+        if (power > powerConversion["G"])
+        {
+            return (power / powerConversion["G"]).ToString() + " GW";
+        }
+        else if (power > powerConversion["M"])
+        {
+            return (power / powerConversion["M"]).ToString() + " MW";
+        }
+        else if (power > powerConversion["k"])
+        {
+            return (power / powerConversion["k"]).ToString() + " kW";
+        }
+        else
+        {
+            return power.ToString() + " W";
+        }
+    }
+
+    public static string roundNumber(double number)
+    {
+        if (number < 0.0)
+        {
+            return number.ToString("0.000");
+        }
+        else if (number < 100.0)
+        {
+            return number.ToString("00.00");
+        }
+        else
+        {
+            return number.ToString("000.0");
+        }
+    }
+
+    public static double secondsToDisplace(double displacement, double velocity = 0, double acceleration = 0)
+    {
+        double seconds = 0;
+        if (acceleration != 0)
+        {
+            seconds = (Math.Sqrt(2.0 * acceleration * displacement + Math.Pow(velocity, 2.0)) - velocity) / acceleration;
+        }
+        else if (velocity != 0)
+        {
+            seconds = displacement / velocity;
+        }
+        else
+        {
+            seconds = displacement == 0 ? 0 : long.MaxValue;
+        }
+
+        return seconds;
+    }
+
+    public static double RadianToDegree(double angle)
+    {
+        return angle * (180.0 / Math.PI);
     }
 }
