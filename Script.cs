@@ -187,6 +187,28 @@ public class executor
                     }
                     break;
 
+                case "getCompass":
+                    {
+                        LCD.debugWrite(operation[0], true);
+
+                        string[] args = operation[1].Split(subArgumentDelimiter);
+                        switch (args[0].Trim())
+                        {
+                            case "displayCompass":
+                                output += LCD.renderCompass(helper.RadianToDegree(navigationService.currentPosition.heading), xLength, Convert.ToInt32(args[1]));
+                                break;
+
+                            case "displayHeading":
+                                output += helper.roundNumber(helper.RadianToDegree(navigationService.currentPosition.heading)) + "°";
+                                break;
+
+                            default:
+                                output += "UNKNOWN OPTION: " + args[0];
+                                break;
+                        }
+                    }
+                    break;
+
                 case "totalPowerUsed":
                     {
                         LCD.debugWrite(operation[0], true);
@@ -727,6 +749,83 @@ public class display
         }
 
         return output + barEnd;
+    }
+
+    public string renderCompass(double angleDeg, int xLength, int numOfFillsPerInterval)
+    {
+        string compassFill = "--";
+        string northMarker = "||N||";
+        string southMarker = "|S|";
+        string eastMarker = "|E|";
+        string westMarker = "|W|";
+        string output = "";
+
+        Func<int, string> generateMarking = new Func<int, string>(degree => {
+            if ((degree % 90) != 0)
+            {
+                return degree >= 0 ? degree.ToString("000.") : (360 + degree).ToString("000.");
+            }
+            else if ((degree == 0) || (degree == 360))
+            {
+                return northMarker;
+            }
+            else if (degree == 90)
+            {
+                return eastMarker;
+            }
+            else if (degree == 180)
+            {
+                return southMarker;
+            }
+            else if (degree == 270)
+            {
+                return westMarker;
+            }
+            else
+            {
+                return "???";
+            }
+        });
+
+        int numberedInterval = 10;
+        double degreesPerFillCharacter = numberedInterval / numOfFillsPerInterval;
+
+        string fullFillString = new StringBuilder(Convert.ToInt32(compassFill.Length * numOfFillsPerInterval)).Insert(0, compassFill, numOfFillsPerInterval).ToString();
+
+        int centralIndex = 0;
+        int finalDegree = 0;
+
+        for (int degree = Convert.ToInt32(angleDeg - (angleDeg % numberedInterval)); output.Length < xLength / 2 + fullFillString.Length + 5; degree = degree + numberedInterval)
+        {
+            string upperMarking = generateMarking(degree + numberedInterval);
+
+            if ((angleDeg < degree + numberedInterval) && (angleDeg > degree))
+            {
+                string lowerMarking = generateMarking(degree);
+                centralIndex = (int)Math.Round(((lowerMarking.Length - 1) / 2 + fullFillString.Length + (upperMarking.Length - 1) / 2) * ((angleDeg % numberedInterval) / numberedInterval));
+            }
+
+            output += fullFillString + upperMarking;
+
+            finalDegree += numberedInterval;
+        }
+
+        for (int degree = Convert.ToInt32(angleDeg - (angleDeg % numberedInterval) - numberedInterval); degree > ((angleDeg - (angleDeg % numberedInterval)) - finalDegree - fullFillString.Length - 5); degree = degree - numberedInterval)
+        {
+            string upperMarking = generateMarking(degree + numberedInterval);
+
+            string tempOutput = fullFillString + upperMarking;
+            output = tempOutput + output;
+
+            centralIndex += tempOutput.Length;
+        }
+
+        if (xLength % 2 == 0)
+        {
+            xLength = xLength - 1;
+        }
+
+        return output.Substring(centralIndex - (xLength - 1) / 2, xLength);
     }
 }
 

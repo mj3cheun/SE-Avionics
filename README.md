@@ -106,6 +106,22 @@ getAltimeter:displayPercentageBar,5000;
 getAltimeter:displayAltitude;
 ```
 
+**getCompass**
+
+The getCompass instruction is used to display the heading of the ship relative to absolute north. There are two arguments that can be used:
+
+- displayCompass:
+Creates an animated compass which places the rough heading of the ship in the middle. Requires a second argument, which specifies the distance, more specifically, the number of dashes that should be used in between each number interval. This instruction depends on the viewportSize to get the width of the display.
+
+- displayHeading:
+Returns the altitude in numerical form.
+
+Examples
+```
+getCompass:displayCompass,4;
+getCompass:displayHeading;
+```
+
 **totalPowerUsed**
 
 The totalPowerUsed instruction is used to display the percentage of power that is being consumed by the ship out of its total available power at the moment the command is executed. There are three arguments that can be used:
